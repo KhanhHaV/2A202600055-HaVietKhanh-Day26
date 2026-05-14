@@ -176,6 +176,86 @@ Antigravity commonly uses an `mcp_config.json` file with a shape similar to Gemi
 
 Optional bonus:
 
-- add authentication for SSE or HTTP transport
 - support both SQLite and PostgreSQL with the same MCP surface
 - add richer output annotations or pagination
+
+---
+
+## Implementation Details
+
+### Setup Instructions
+
+1. **Install dependencies:**
+   Ensure you have `fastmcp` and `pytest` installed.
+   ```bash
+   pip install fastmcp pytest
+   ```
+
+2. **Initialize Database:**
+   ```bash
+   cd implementation
+   python init_db.py
+   ```
+   This will create a `database.sqlite` file with the required seed data (`students`, `courses`, `enrollments`).
+
+### Verification Steps
+
+1. **Standalone Verification:**
+   Run the verification script to test tools locally without an MCP client:
+   ```bash
+   python verify_server.py
+   ```
+
+2. **Automated Testing:**
+   Run the test suite to verify the safe SQL building logic and input validation:
+   ```bash
+   pytest tests/test_server.py
+   ```
+
+### Running the Server
+
+Ensure you are in the `implementation` directory:
+```bash
+cd implementation
+```
+
+- **Standard Stdio Transport:**
+  ```bash
+  python mcp_server.py --transport stdio
+  ```
+
+- **SSE Transport (Bonus Point):**
+  ```bash
+  python mcp_server.py --transport sse --port 8000
+  ```
+
+### Client Configuration
+
+**Gemini CLI:**
+```bash
+gemini mcp add sqlite-lab python $(pwd)/mcp_server.py --description "SQLite lab FastMCP server" --timeout 10000
+gemini mcp list
+gemini --allowed-mcp-server-names sqlite-lab --yolo -p "Use the sqlite-lab MCP server and show me the top 2 students by score."
+```
+
+**Claude Code:**
+Add the following to your `.mcp.json`:
+```json
+{
+  "mcpServers": {
+    "sqlite-lab": {
+      "type": "stdio",
+      "command": "python",
+      "args": ["/ABSOLUTE/PATH/TO/implementation/mcp_server.py"],
+      "env": {}
+    }
+  }
+}
+```
+
+### Inspector Tooling
+
+Run the included shell script to start the MCP Inspector:
+```bash
+./start_inspector.sh
+```
